@@ -13,17 +13,17 @@ pipeline {
         }
         stage('Test Report') {
             steps {
-                sh 'mvn test'
+                sh 'mvn javadoc:javadoc'
             }
         }
     }
     
     post {
         always {
-            junit '**/target/surefire-reports/*.xml'
             archiveArtifacts artifacts: '**/target/site/**', fingerprint: true
             archiveArtifacts artifacts: '**/target/**/*.jar', fingerprint: true
             archiveArtifacts artifacts: '**/target/**/*.war', fingerprint: true
+            archiveArtifacts artifacts: '**/target/site/apidocs/**', fingerprint: true
         }
     }
 }
