@@ -6,6 +6,11 @@ pipeline {
                 sh 'mvn -B -DskipTests clean package' 
             }
         }
+        stage('Doc') {
+            steps {
+                sh 'mvn javadoc:javadoc'
+            }
+        }
         stage('pmd') {
             steps {
                 sh 'mvn pmd:pmd'
@@ -13,7 +18,12 @@ pipeline {
         }
         stage('Test Report') {
             steps {
-                sh 'mvn javadoc:javadoc'
+                sh 'mvn test'
+            }
+            post {
+                always {
+                    junit '**/target/surefire-reports/*.xml'
+                }
             }
         }
     }
