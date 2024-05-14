@@ -13,20 +13,14 @@ pipeline {
         }
         stage('Test Report') {
             steps {
-                 catchError(buildResult: 'UNSTABLE', stageResult: 'FAILURE') {
-                    sh 'mvn test'
-                }
-            }
-            post {
-                always {
-                    junit '**/target/surefire-reports/*.xml'
-                }
+                sh 'mvn test'
             }
         }
     }
-
+    
     post {
         always {
+            junit '**/target/surefire-reports/*.xml'
             archiveArtifacts artifacts: '**/target/site/**', fingerprint: true
             archiveArtifacts artifacts: '**/target/**/*.jar', fingerprint: true
             archiveArtifacts artifacts: '**/target/**/*.war', fingerprint: true
