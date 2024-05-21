@@ -1,40 +1,41 @@
 pipeline {
     agent any
     stages {
-        stage('Build') { 
+        stage('Checkout') {
             steps {
-                sh 'mvn -B -DskipTests clean package' 
+                git 'https://github.com/DreamOK2333/Teedy.git' 
             }
         }
-        stage('Doc') {
+        stage('Build Docker Image') {
             steps {
-                sh 'mvn javadoc:javadoc'
+                script {
+                    dockerImage = docker.build("your-dockerhub-username/your-repo-name:latest")
+                }
             }
         }
-        stage('pmd') {
+        stage('Push Docker Image') {
             steps {
-                sh 'mvn pmd:pmd'
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials-id') {
+                        dockerImage.push()
+                    }
+                }
             }
         }
-        stage('Test Report') {
+        stage('Run Containers') {
             steps {
-                sh 'mvn test'
-            }
-            post {
-                always {
-                    junit '**/target/surefire-reports/*.xml'
+                script {
+                    sh 'docker run -d -p 8082:8080 your-dockerhub-username/your-repo-name:latest'
+                    sh 'docker run -d -p 8083:8080 your-dockerhub-username/your-repo-name:latest'
+                    sh 'docker run -d -p 8084:8080 your-dockerhub-username/your-repo-name:latest'
                 }
             }
         }
     }
-    
     post {
         always {
-            archiveArtifacts artifacts: '**/target/site/**', fingerprint: true
-            archiveArtifacts artifacts: '**/target/**/*.jar', fingerprint: true
-            archiveArtifacts artifacts: '**/target/**/*.war', fingerprint: true
-            archiveArtifacts artifacts: '**/target/site/apidocs/**', fingerprint: true
-            archiveArtifacts artifacts: '**/target/custom-surefire-reports/**', fingerprint: true
+            echo 'Cleaning up...'
+            sh 'docker system prune -f'
         }
     }
 }
