@@ -42,10 +42,4 @@ pipeline {
             }
         }
     }
-    post {
-        always {
-            echo 'Cleaning up...'
-            sh 'docker system prune -f'
-        }
-    }
 }
